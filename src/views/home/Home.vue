@@ -32,15 +32,15 @@ import NavBar from 'components/common/navbar/NavBar';
 import TabControl from 'components/content/tabControl/TabControl'
 import GoodsList from 'components/content/goods/GoodsList'
 import Scroll from 'components/common/scroll/Scroll';
-import BackTop from 'components/content/backTop/BackTop'
 
 import {getHomeMultidata,getHomeGoods} from 'network/home';
-import {debounce} from 'common/utils'
+import {itemListenerMixin,backTopMixin} from 'common/mixin'
 
 
 
 export default {
    name:'Home',
+   mixins:[itemListenerMixin,backTopMixin],
    components:{
        HomeSwiper,
        RecommendView,
@@ -49,7 +49,6 @@ export default {
        TabControl,
        GoodsList,
        Scroll,
-       BackTop
    },
    data(){
       return {
@@ -64,7 +63,8 @@ export default {
           isShowBackTop:false,
           tabOffsetTop:0,
           isTabFixed:false,
-          saveY:0
+          saveY:0,
+          itemImgListener:null
       }
    },
    computed:{
@@ -91,17 +91,15 @@ export default {
    },
    deactivated(){
     //    console.log("deactivated")
+    //1、保存y值
        this.saveY=this.$refs.scroll.getScrollY()
     //    console.log(this.saveY)
+    //2、取消全局事件的监听
+    this.$bus.$off("itemImageLoad",this.itemImgListener)
+
    },
    mounted(){
 
-        const refresh= debounce(this.$refs.scroll.refresh,50)
-
-       //3、监听item中图片加载完成
-         this.$bus.$on('itemImageLoad',()=>{
-            refresh()
-       })
    },
    methods:{  
        
